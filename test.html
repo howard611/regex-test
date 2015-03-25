@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+
+<p>Click the button to test the regex on the string!</p>
+
+<button onclick="myFunction()">Try it</button>
+
+<p id="demo"></p>
+
+<script>
+function myFunction() {
+    var str = "This is the most delicious hat in the world. It's also known to appear and disappear mysteriously. Increases Perception by <%= per %>. Limited Edition 2013-2014 Winter Gear.";
+    var first = str.search(/(\.|\!) Increases|(\.|\!) Confers/g)+1;
+    var second = str.search(/>\./g)+2; /* ISSUE: Should be querying ">" or digits before that full stop? */
+    var confer = str.search(/(\.|\!) Confers/g)+2;
+    if (second == -1+2) { /* if "> ." does not exist, then either "Confers..." or nothing exists */
+    	if (confer != -1+2) { /* Case 1: if "Confers..." exists */
+    		var res = str.substring(0,first);
+    	} else { /* Case 2: nothing exists */
+    		var res = str;
+    	}
+    } else { /* Case 3: "Increases...< >..." exists */
+    	var res = str.substring(0,first).concat(' ',str.substring(second,str.length));
+    }
+    document.getElementById("demo").innerHTML = res;
+}
+</script>
+
+</body>
+</html>
