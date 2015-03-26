@@ -6,25 +6,71 @@
 
 <button onclick="myFunction()">Try it</button>
 
+<ul>
+    <li>Case 0: "No Weapon."</li>
+    <li>Case 1: "Confers no benefit." - Some / no text after</li>
+    <li>Case 2: "Increases Intelligence by 10." OR "Increases Intelligence by 10 and Perception by 10." - Some / no text after</li>
+    <li>Case 3: "Increases Intelligence and Constitution by 10 each." - Some / no text after, Need to filter for both cases of single / double digits</li>
+</ul>
+
 <p id="demo"></p>
+<p style="font-weight: bold" id="everything"></p>
+<p style="font-weight: bold" id="confer_start"></p>
+<p id="confer_end"></p>
+<p id="inc_start"></p>
+<p id="inc_end"></p>
+<p style="font-weight: bold" id="each_end"></p>
+<p style="font-weight: bold" id="single"></p>
 
 <script>
 function myFunction() {
-    var str = "This is the most delicious hat in the world. It's also known to appear and disappear mysteriously. Increases Perception by <%= per %>. Limited Edition 2013-2014 Winter Gear.";
-    var first = str.search(/(\.|\!) Increases|(\.|\!) Confers/g)+1;
-    var second = str.search(/>\./g)+2; /* ISSUE: Should be querying ">" or digits before that full stop? */
-    var confer = str.search(/(\.|\!) Confers/g)+2;
-    if (second == -1+2) { /* if "> ." does not exist, then either "Confers..." or nothing exists */
-    	if (confer != -1+2) { /* Case 1: if "Confers..." exists */
-    		var res = str.substring(0,first);
-    	} else { /* Case 2: nothing exists */
-    		var res = str;
-    	}
-    } else { /* Case 3: "Increases...< >..." exists */
-    	var res = str.substring(0,first).concat(' ',str.substring(second,str.length));
+    var str = "This is the most delicious hat in the world. It's also known to appear and disappear mysteriously. Increases Intelligence and Perception by 10 each. Limited Edition 2013-2014 Winter Gear.";
+    
+    // Javascript does not support global search & lookbehind, only supports lookahead
+    
+    var everything = str.search(/\.(?= Increases)|\d{1,2}\.|each\.|\.(?= Confers)/);
+    var confer_start = str.search(/\.(?= Confers)/)+1; // +1 to account for full stop so prints that too 
+    var confer_end = str.search(/benefit\./)+8; // +8 for covering 'benefit.' 
+    var inc_start = str.search(/\.(?= Increases)/)+1;
+    var inc_end = str.search(/\d{1,2}\./); // Can be single digits or double digits.
+    var each_end = str.search(/each\./)+5; // +5 for covering 'each.'
+    var double = str.search(/\d{2}\./);
+    
+    if (everything == -1) { // Case 0: "No Weapon."
+        var output = "Case 0: " + str;
+    } else if (confer_start != -1+1) { // Case 1: "Confers no benefit."
+        var output = "Case 1: " + str.substring(0,confer_start) + " " + str.substring(confer_end,str.length);
+    } else if (each_end != -1+5) { // Case 3: "Increases Intelligence and Constitution by 10 each."
+        var output = "Case 3: " + str.substring(0,inc_start) + " " + str.substring(each_end,str.length);
+    } else if (double != -1) { // Case 2 w/ double digits: "Increases Intelligence by 10." OR "Increases Intelligence by 10 and Perception by 10." Need to filter for both cases of single / double digits
+        var output = "Case 2 w/ dd: " + str.substring(0,inc_start) + " " + str.substring(inc_end+3,str.length);
+    } else { // Case 2 w/ single digits
+        var output = "Case 2 w/ sd: " + str.substring(0,inc_start) + " " + str.substring(inc_end+2,str.length); 
     }
-    document.getElementById("demo").innerHTML = res;
+    
+    document.getElementById("demo").innerHTML = output;
+    
+    document.getElementById("everything").innerHTML = "everything is " + everything;
+    document.getElementById("confer_start").innerHTML = "confer_start is " + confer_start;
+    document.getElementById("confer_end").innerHTML = "confer_end is " + confer_end;
+    document.getElementById("inc_start").innerHTML = "inc_start is " + inc_start;
+    document.getElementById("inc_end").innerHTML = "inc_end is " + inc_end;
+    document.getElementById("each_end").innerHTML = "each_end is " + each_end;
+    document.getElementById("single").innerHTML = "single is " + double;
 }
+
+/* Test Cases:
+
+No Weapon
+Confers no benefit
+Increases Intelligence by 10.
+Increases Intelligence by 5.
+Increases Intelligence by 10 and Perception by 10.
+Increases Intelligence by 10 and Perception by 5.
+Increases Intelligence and Perception by 10 each.
+
+*/
+
 </script>
 
 </body>
